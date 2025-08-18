@@ -17,9 +17,9 @@ class Request {
         $decoded = json_decode($input, true);
 
         if (is_array($decoded)) {
-            $this->body = $decoded;
+            $this->body = (object) $decoded;
         } else {
-            $this->body = $_POST;
+            $this->body = (object) $_POST;
         }
     }
 }

@@ -6,15 +6,28 @@ $baseFolder = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
 if ($baseFolder !== '/' && strpos($uri, $baseFolder) === 0) {
     $uri = substr($uri, strlen($baseFolder));
 }
+$uri = rtrim($uri, '/');       // normalize: remove trailing slash
 $uri = $uri === '' ? '/' : $uri;
+
 
 // ----------------- Dispatch -----------------
 $method = $_SERVER['REQUEST_METHOD'];
 
-$apiRoutes = require __DIR__ . '/../routes/api.php';
-$webRoutes = require __DIR__ . '/../routes/web.php';
+$apiGroup  = require __DIR__ . '/../routes/api.php';
+$webGroup  = require __DIR__ . '/../routes/web.php';
 
-$routes = array_merge($apiRoutes, $webRoutes);
+$routes = [];
+
+// normalize both groups
+foreach ([$apiGroup, $webGroup] as $group) {
+    $prefix = rtrim($group['prefix'], '/');
+    foreach ($group['routes'] as $route) {
+        [$m, $path, $handler, $middleware] = $route + [null, null, null, null];
+        $path = '/' . trim($path, '/');
+        $fullPath = $prefix === '' || $prefix === '/' ? $path : $prefix . $path;
+        $routes[] = [$m, $fullPath, $handler, $middleware];
+    }
+}
 
 $found = false;
 

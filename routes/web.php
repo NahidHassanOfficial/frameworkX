@@ -1,5 +1,9 @@
 <?php
 return [
     // [METHOD, ROUTE, [Controller, Method], Middleware]
-    ['GET', '/', ['HomeController', 'index']], // no middleware
+    'prefix' => '/',
+    'routes' => [
+        ['GET', '/', ['HomeController', 'index']],
+        ['GET', '/about', ['HomeController', 'about']],
+    ]
 ];

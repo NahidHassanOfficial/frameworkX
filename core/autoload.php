@@ -4,6 +4,8 @@
 spl_autoload_register(function ($class) {
     $paths = [
         __DIR__ . "/../controllers/$class.php",
+        __DIR__ . "/../controllers/api/$class.php",
+        __DIR__ . "/../controllers/web/$class.php",
         __DIR__ . "/../middlewares/$class.php",
         __DIR__ . "/../helpers/$class.php",
         __DIR__ . "/../services/$class.php",

@@ -4,15 +4,15 @@ class HomeController
 {
     public static function index()
     {
-       return include_once(__DIR__ .'/../views/Home.php');
+        return View::render('Home');
     }
 
-    public static function profile($id)
+    public static function profile(Request $request, $id, $param)
     {
         echo "User ID: $id";
     }
     public static function about()
     {
-       return include_once(__DIR__ .'/../views/About.php');
+        return View::render('About');
     }
 }

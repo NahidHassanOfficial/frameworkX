@@ -1,10 +1,11 @@
 <?php
 return [
     // [METHOD, ROUTE, [Controller, Method], Middleware]
+    'prefix' => '/api/v1/',
+    'routes' => [
+        ['POST', '/login', ['AuthenticationController', 'login']],
+        ['POST', '/logout', ['AuthenticationController', 'logout']],
 
-    ['POST', '/login', ['AuthenticationController', 'login']],
-    ['POST', '/logout', ['AuthenticationController', 'logout']],
-
-    ['GET', '/about', ['HomeController', 'about']],
-    ['GET', '/user/{id}', ['HomeController', 'profile'], 'AuthMiddleware::check'],
+        ['GET', '/user/{id}/profile/{param}', ['HomeController', 'profile']],
+    ]
 ];

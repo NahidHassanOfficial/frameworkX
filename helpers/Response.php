@@ -8,6 +8,7 @@ class Response
         header('Content-Type: application/json'); // Ensure proper JSON header
         http_response_code($code); // Set HTTP response status code
         echo json_encode($data, JSON_PRETTY_PRINT);
+        exit;
     }
 
 
