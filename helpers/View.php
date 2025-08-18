@@ -4,7 +4,7 @@ class View
 {
     public static function render($view, $data = [])
     {
-        // make variables from $data accessible in the view
+        // make variables from associative array; will be accessible in the view
         extract($data);
 
         // build file path

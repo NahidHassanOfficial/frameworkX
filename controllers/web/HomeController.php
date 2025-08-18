@@ -4,7 +4,9 @@ class HomeController
 {
     public static function index()
     {
-        return View::render('Home');
+        global $DB;
+        $user1 = $DB->result_one("SELECT fname, lname FROM user WHERE id = 1");
+        return View::render('Home', ['user' => $user1]);
     }
 
     public static function profile(Request $request, $id, $param)
