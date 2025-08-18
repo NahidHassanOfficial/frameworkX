@@ -1,0 +1,11 @@
+# Set default file
+DirectoryIndex index.php
+
+# Disable directory listing
+Options -Indexes
+
+# Redirect all requests to config.php if not a real file/folder
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
