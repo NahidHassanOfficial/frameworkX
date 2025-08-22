@@ -11,4 +11,5 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 /* End Testing Constant */
 
-define('isProduction', false);
+define('IS_PRODUCTION', false);
+define('IS_MAINTENANCE', true);
