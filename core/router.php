@@ -6,15 +6,14 @@ $baseFolder = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
 if ($baseFolder !== '/' && strpos($uri, $baseFolder) === 0) {
     $uri = substr($uri, strlen($baseFolder));
 }
-$uri = rtrim($uri, '/');       // normalize: remove trailing slash
+$uri = rtrim($uri, '/'); // normalize: remove trailing slash
 $uri = $uri === '' ? '/' : $uri;
-
 
 // ----------------- Dispatch -----------------
 $method = $_SERVER['REQUEST_METHOD'];
 
-$apiGroup  = require __DIR__ . '/../routes/api.php';
-$webGroup  = require __DIR__ . '/../routes/web.php';
+$apiGroup = require __DIR__.'/../routes/api.php';
+$webGroup = require __DIR__.'/../routes/web.php';
 
 $routes = [];
 
@@ -23,8 +22,8 @@ foreach ([$apiGroup, $webGroup] as $group) {
     $prefix = rtrim($group['prefix'], '/');
     foreach ($group['routes'] as $route) {
         [$m, $path, $handler, $middleware] = $route + [null, null, null, null];
-        $path = '/' . trim($path, '/');
-        $fullPath = $prefix === '' || $prefix === '/' ? $path : $prefix . $path;
+        $path = '/'.trim($path, '/');
+        $fullPath = $prefix === '' || $prefix === '/' ? $path : $prefix.$path;
         $routes[] = [$m, $fullPath, $handler, $middleware];
     }
 }
@@ -35,10 +34,12 @@ $found = false;
 $request = new Request();
 
 foreach ($routes as $route) {
-    [$routeMethod, $routePattern, [$class, $func]] = $route;
+    [$routeMethod, $routePattern, $handler] = $route;
     $middleware = $route[3] ?? null;
 
-    if (strtoupper($method) !== strtoupper($routeMethod)) continue;
+    if (strtoupper($method) !== strtoupper($routeMethod)) {
+        continue;
+    }
 
     $pattern = preg_replace('#\{[a-zA-Z_][a-zA-Z0-9_]*\}#', '([^/]+)', $routePattern);
     $pattern = "#^$pattern$#";
@@ -46,44 +47,64 @@ foreach ($routes as $route) {
     if (preg_match($pattern, $uri, $matches)) {
         array_shift($matches);
 
-        // Run middleware if exists
+        // Run middleware if exists (support multiple, with params)
         if ($middleware) {
-            $result = true;
-
-            if (is_callable($middleware)) {
-                $result = $middleware();
-            } elseif (is_string($middleware) && strpos($middleware, '::') !== false) {
-                [$mwClass, $mwMethod] = explode('::', $middleware);
-                if (class_exists($mwClass) && method_exists($mwClass, $mwMethod)) {
-                    $result = $mwClass::$mwMethod();
-                } else {
-                    http_response_code(500);
-                    echo "Middleware class or method not found!";
-                    exit;
+            $middlewares = is_array($middleware) ? $middleware : [$middleware];
+            foreach ($middlewares as $mw) {
+                $result = true;
+                if (is_callable($mw)) {
+                    $result = $mw($request);
+                } elseif (is_string($mw) && strpos($mw, '::') !== false) {
+                    // Support 'Class::method:param1,param2' format
+                    $mwParts = explode('::', $mw, 2);
+                    $mwClass = $mwParts[0];
+                    $methodAndParams = $mwParts[1];
+                    $mwMethod = $methodAndParams;
+                    $params = [];
+                    if (strpos($methodAndParams, ':') !== false) {
+                        [$mwMethod, $paramStr] = explode(':', $methodAndParams, 2);
+                        $params = array_map('trim', explode(',', $paramStr));
+                    }
+                    if (class_exists($mwClass) && method_exists($mwClass, $mwMethod)) {
+                        $result = $mwClass::$mwMethod($request, ...$params);
+                    } else {
+                        http_response_code(500);
+                        echo "Middleware class or method not found!";
+                        exit;
+                    }
                 }
-            }
-
-            if ($result === false) {
-                $found = true; // middleware blocked, consider route handled
-                exit; // stop execution
+                if ($result === false) {
+                    $found = true; // middleware blocked, consider route handled
+                    exit;          // stop execution
+                }
             }
         }
 
-        // Run controller with Request object
-        if (class_exists($class) && method_exists($class, $func)) {
-            // Pass Request object as first parameter, followed by route parameters
-            $class::$func($request, ...$matches);
+        // Run controller or closure with Request object
+        if (is_callable($handler)) {
+            $handler($request, ...$matches);
             $found = true;
             break;
+        } elseif (is_array($handler) && count($handler) === 2) {
+            [$class, $func] = $handler;
+            if (class_exists($class) && method_exists($class, $func)) {
+                $class::$func($request, ...$matches);
+                $found = true;
+                break;
+            } else {
+                http_response_code(500);
+                echo "Controller class or method not found!";
+                exit;
+            }
         } else {
             http_response_code(500);
-            echo "Controller class or method not found!";
+            echo "Invalid route handler!";
             exit;
         }
     }
 }
 
-if (!$found) {
+if (! $found) {
     http_response_code(404);
     echo "404 Not Found";
 }
