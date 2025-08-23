@@ -10,10 +10,9 @@ $uri = rtrim($uri, '/'); // normalize: remove trailing slash
 $uri = $uri === '' ? '/' : $uri;
 
 // ----------------- Dispatch -----------------
-$method = $_SERVER['REQUEST_METHOD'];
 
-$apiGroup = require __DIR__.'/../routes/api.php';
-$webGroup = require __DIR__.'/../routes/web.php';
+$apiGroup = require __DIR__ . '/../routes/api.php';
+$webGroup = require __DIR__ . '/../routes/web.php';
 
 $routes = [];
 
@@ -22,8 +21,8 @@ foreach ([$apiGroup, $webGroup] as $group) {
     $prefix = rtrim($group['prefix'], '/');
     foreach ($group['routes'] as $route) {
         [$m, $path, $handler, $middleware] = $route + [null, null, null, null];
-        $path = '/'.trim($path, '/');
-        $fullPath = $prefix === '' || $prefix === '/' ? $path : $prefix.$path;
+        $path = '/' . trim($path, '/');
+        $fullPath = $prefix === '' || $prefix === '/' ? $path : $prefix . $path;
         $routes[] = [$m, $fullPath, $handler, $middleware];
     }
 }
@@ -33,6 +32,7 @@ $found = false;
 // Create Request object
 $request = new Request();
 
+$method = $_SERVER['REQUEST_METHOD'];
 foreach ($routes as $route) {
     [$routeMethod, $routePattern, $handler] = $route;
     $middleware = $route[3] ?? null;
@@ -104,7 +104,21 @@ foreach ($routes as $route) {
     }
 }
 
+function handleNotFound($requestUri)
+{
+    if (strpos($requestUri, '/api') === 0) {
+        // API route: return JSON
+        header('Content-Type: application/json', true, 404);
+        echo json_encode(['status' => 'error', 'message' => 'Not Found'], JSON_PRETTY_PRINT);
+    } else {
+        // Web route: render 404 page
+        http_response_code(404);
+        echo View::render('error/404');
+    }
+    exit;
+}
+
+
 if (! $found) {
-    http_response_code(404);
-    echo "404 Not Found";
+    handleNotFound($uri);
 }
