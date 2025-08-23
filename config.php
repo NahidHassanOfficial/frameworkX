@@ -12,4 +12,4 @@ define('DB_PASS', '');
 /* End Testing Constant */
 
 define('IS_PRODUCTION', false);
-define('IS_MAINTENANCE', false);
+define('IS_MAINTENANCE',  false);
