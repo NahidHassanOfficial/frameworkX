@@ -20,10 +20,10 @@ $routes = [];
 foreach ([$apiGroup, $webGroup] as $group) {
     $prefix = rtrim($group['prefix'], '/');
     foreach ($group['routes'] as $route) {
-        [$m, $path, $handler, $middleware] = $route + [null, null, null, null];
+        [$method, $path, $handler, $middleware] = $route + [null, null, null, null];
         $path = '/' . trim($path, '/');
         $fullPath = $prefix === '' || $prefix === '/' ? $path : $prefix . $path;
-        $routes[] = [$m, $fullPath, $handler, $middleware];
+        $routes[] = [$method, $fullPath, $handler, $middleware];
     }
 }
 
