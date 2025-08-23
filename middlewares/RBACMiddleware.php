@@ -2,7 +2,7 @@
 
 class RBACMiddleware
 {
-    public static function allow($permissions = [])
+    public static function allow(Request $request, ...$permissions)
     {
         $allowed = false;
         foreach ($permissions as $permission) {
