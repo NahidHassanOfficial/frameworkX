@@ -24,9 +24,6 @@ class MySQLDatabase
         return self::$instance;
     }
 
-    private function __clone() { }
-    private function __wakeup() { }
-
     // -------------------- QUERY METHODS --------------------
 
     // Raw query
