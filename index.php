@@ -8,7 +8,7 @@ require_once __DIR__ . '/core/autoload.php';
 require_once __DIR__ . '/core/cors.php';
 
 if (constant('IS_MAINTENANCE')) {
-    View::render('error/503');
+    View::render('error/503', [], false);
     exit;
 }
 

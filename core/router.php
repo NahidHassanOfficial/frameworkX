@@ -113,7 +113,7 @@ function handleNotFound($requestUri)
     } else {
         // Web route: render 404 page
         http_response_code(404);
-        echo View::render('error/404');
+        echo View::render('error/404', [], '');
     }
     exit;
 }
