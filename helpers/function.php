@@ -24,3 +24,10 @@ function isNotEmpty($postVariable, $name = null)
 
     return ! empty($postVariable);
 }
+
+
+function asset($string)
+{
+    global $BASE_URL; // use your defined base URL
+    return rtrim($BASE_URL, '/') . '/public/' . ltrim($string, '/');
+}

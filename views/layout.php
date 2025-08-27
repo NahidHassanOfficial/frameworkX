@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<link rel="shortcut icon" href="/public/icon.png" type="image/x-icon">
+<link rel="shortcut icon" href="<?= asset('icon.png') ?>" type="image/x-icon">
 <head>
     <title>My App</title>
 </head>

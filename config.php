@@ -1,7 +1,10 @@
 <?php
 
+$APP_NAME = 'FrameworkX';
+$BASE_URL = '/frameworkX/';
+
 if (session_status() == PHP_SESSION_NONE) {
-    session_name('frameworkX');
+    session_name($APP_NAME);
     session_start();
 }
 
